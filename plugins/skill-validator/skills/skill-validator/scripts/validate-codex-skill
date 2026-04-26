@@ -7,9 +7,13 @@ PYAML_SPEC="PyYAML>=6.0.2,<7"
 
 usage() {
   cat <<'USAGE'
-Usage: validate-codex-skill <skill-dir> [<skill-dir> ...]
+Usage:
+  validate-codex-skill <skill-dir> [<skill-dir> ...]
+  validate-codex-skill --repo <repo-dir>
+  validate-codex-skill [--strict] [--json] <skill-dir>
 
-Validates Codex skill directories for required structure and metadata.
+Validates Codex skill directories, plugin manifests, marketplace manifests,
+and plugin repositories.
 
 Environment manager detection order:
   1. uv   - preferred; installs PyYAML in an ephemeral uv environment

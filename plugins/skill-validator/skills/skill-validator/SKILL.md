@@ -1,27 +1,31 @@
 ---
 name: skill-validator
-description: Use when the user asks to validate, check, QA, smoke-test, or prepare a Codex skill directory before use or publishing. Runs the bundled validator script, detects supported Python environment managers, and reports actionable validation results.
+description: Use when the user asks to validate, check, QA, smoke-test, or prepare a Codex skill, plugin, marketplace, or skill repository before use or publishing. Runs the bundled validator script, detects supported Python environment managers, and reports actionable validation results.
 ---
 
 # Skill Validator
 
 ## Overview
 
-Validate Codex skill directories with the bundled validator:
+Validate Codex skill directories and plugin repositories with the bundled validator:
 
 ```bash
 ~/.codex/skills/skill-validator/scripts/validate-codex-skill <skill-dir>
+~/.codex/skills/skill-validator/scripts/validate-codex-skill --repo <repo-dir>
 ```
 
-Use this skill for user-level, repo-hosted, or downloaded Codex skills before relying on them or publishing them.
+Use this skill for user-level, repo-hosted, or downloaded Codex skills before relying on them or publishing them. Use `--repo` when validating a GitHub-ready repository that contains plugins, marketplaces, or multiple skills.
 
 ## Workflow
 
-1. Identify the skill directory. If the user gives a skill name, first try `~/.codex/skills/<name>`.
-2. Confirm the directory exists and contains `SKILL.md`.
-3. Run `~/.codex/skills/skill-validator/scripts/validate-codex-skill <skill-dir>`.
-4. If validation passes, report the skill is valid.
-5. If validation fails, summarize actionable errors and file paths.
+1. Identify whether the target is a skill directory or repository.
+2. If the user gives a skill name, first try `~/.codex/skills/<name>`.
+3. Run `~/.codex/skills/skill-validator/scripts/validate-codex-skill <skill-dir>` for one or more skill directories.
+4. Run `~/.codex/skills/skill-validator/scripts/validate-codex-skill --repo <repo-dir>` for plugin repositories.
+5. Use `--json` when the caller needs machine-readable output.
+6. Use `--strict` when warnings should fail validation.
+7. If validation passes, report the target is valid.
+8. If validation fails, summarize actionable errors and file paths.
 
 ## Environment Manager Detection
 
@@ -36,16 +40,26 @@ If none are found, it exits with a message recommending `uv` plus alternatives.
 
 ## Current Validation Coverage
 
-The bundled validator checks core skill structure and metadata, including:
+The bundled validator checks:
 
 - `SKILL.md` presence
 - parseable YAML frontmatter
 - required skill metadata such as `name` and `description`
-- skill name versus directory name warning
+- skill and plugin name safety and hyphen-case style
+- skill name versus directory name warnings
 - parseable `agents/openai.yaml`, when present
 - `agents/openai.yaml` interface field types
-- `default_prompt` mention of `$skill-name` warning
-- TODO placeholder warnings
+- `default_prompt` mention of `$skill-name` warnings
+- unresolved placeholder warnings
+- local path references in skill Markdown for `scripts/`, `assets/`, `references/`, and `agents/`
+- executable bit warnings for files under `scripts/`
+- shell syntax via `bash -n`
+- Python syntax via in-memory compilation
+- plugin `.codex-plugin/plugin.json` structure in `--repo` mode
+- plugin `skills` path existence in `--repo` mode
+- `.agents/plugins/marketplace.json` structure in `--repo` mode
+- local marketplace source path existence in `--repo` mode
+- marketplace policy enum values in `--repo` mode
 
 ## Commands
 
@@ -59,6 +73,18 @@ Validate an explicit skill directory:
 
 ```bash
 ~/.codex/skills/skill-validator/scripts/validate-codex-skill /path/to/skill-dir
+```
+
+Validate a plugin repository:
+
+```bash
+~/.codex/skills/skill-validator/scripts/validate-codex-skill --repo /path/to/repo
+```
+
+Emit machine-readable output:
+
+```bash
+~/.codex/skills/skill-validator/scripts/validate-codex-skill --json --repo /path/to/repo
 ```
 
 Treat warnings as failures:

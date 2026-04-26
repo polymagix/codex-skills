@@ -1,7 +1,7 @@
 {
   "name": "skill-validator",
-  "version": "0.1.0",
-  "description": "Validate Codex skill directories before use, sharing, or publishing.",
+  "version": "0.2.0",
+  "description": "Validate Codex skills, plugins, and plugin repositories before use, sharing, or publishing.",
   "author": {
     "name": "Polymagix",
     "url": "https://github.com/polymagix"
@@ -18,8 +18,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Skill Validator",
-    "shortDescription": "Validate Codex skill folders and metadata.",
-    "longDescription": "A Codex plugin that bundles the skill-validator skill and a uv-friendly validator script for checking SKILL.md structure, metadata, optional OpenAI agent metadata, and unresolved placeholders before using or publishing a skill.",
+    "shortDescription": "Validate Codex skills, plugins, and marketplaces.",
+    "longDescription": "A Codex plugin that bundles the skill-validator skill and a uv-friendly validator script for checking SKILL.md structure, skill metadata, optional OpenAI agent metadata, plugin manifests, marketplace manifests, local references, script syntax, and unresolved placeholders before using or publishing a skill repository.",
     "developerName": "Polymagix",
     "category": "Productivity",
     "capabilities": [
