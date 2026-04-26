@@ -1,0 +1,103 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+VALIDATOR="$SCRIPT_DIR/basic_validate_skill.py"
+PYAML_SPEC="PyYAML>=6.0.2,<7"
+
+usage() {
+  cat <<'USAGE'
+Usage: validate-codex-skill <skill-dir> [<skill-dir> ...]
+
+Validates Codex skill directories for required structure and metadata.
+
+Environment manager detection order:
+  1. uv   - preferred; installs PyYAML in an ephemeral uv environment
+  2. mise - uses the active mise Python; PyYAML must already be installed
+  3. asdf - uses the active python3 shim; PyYAML must already be installed
+  4. pyenv - uses the active python3 shim; PyYAML must already be installed
+
+If none are found, install uv (recommended): https://docs.astral.sh/uv/
+USAGE
+}
+
+if [[ "$#" -eq 0 || "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+  usage
+  exit 0
+fi
+
+if [[ ! -f "$VALIDATOR" ]]; then
+  echo "ERROR: bundled validator not found: $VALIDATOR" >&2
+  exit 2
+fi
+
+run_with_uv() {
+  local codex_cache="${CODEX_HOME:-$HOME/.codex}/cache/uv"
+  local tmp_cache="${TMPDIR:-/tmp}/codex-skill-validator-uv-cache-${USER:-user}"
+
+  if [[ -n "${UV_CACHE_DIR:-}" && -d "$UV_CACHE_DIR" && -w "$UV_CACHE_DIR" ]]; then
+    :
+  elif mkdir -p "$codex_cache" 2>/dev/null; then
+    export UV_CACHE_DIR="$codex_cache"
+  else
+    mkdir -p "$tmp_cache"
+    export UV_CACHE_DIR="$tmp_cache"
+  fi
+
+  export UV_LINK_MODE="${UV_LINK_MODE:-copy}"
+  exec uv run --with "$PYAML_SPEC" python "$VALIDATOR" "$@"
+}
+
+python_has_yaml() {
+  "$@" -c 'import yaml' >/dev/null 2>&1
+}
+
+missing_yaml_message() {
+  local manager="$1"
+  local install_cmd="$2"
+  cat >&2 <<MSG
+ERROR: Found $manager, but the active Python cannot import the 'yaml' module.
+
+Install PyYAML in that managed Python environment, for example:
+  $install_cmd
+
+Or install uv and rerun; uv is preferred because it can provide the dependency
+without mutating the active Python environment.
+MSG
+}
+
+if command -v uv >/dev/null 2>&1; then
+  run_with_uv "$@"
+elif command -v mise >/dev/null 2>&1; then
+  if python_has_yaml mise exec -- python; then
+    exec mise exec -- python "$VALIDATOR" "$@"
+  fi
+  missing_yaml_message "mise" "mise exec -- python -m pip install '$PYAML_SPEC'"
+  exit 2
+elif command -v asdf >/dev/null 2>&1; then
+  if command -v python3 >/dev/null 2>&1 && python_has_yaml python3; then
+    exec python3 "$VALIDATOR" "$@"
+  fi
+  missing_yaml_message "asdf" "python3 -m pip install '$PYAML_SPEC'"
+  exit 2
+elif command -v pyenv >/dev/null 2>&1; then
+  if command -v python3 >/dev/null 2>&1 && python_has_yaml python3; then
+    exec python3 "$VALIDATOR" "$@"
+  fi
+  missing_yaml_message "pyenv" "python3 -m pip install '$PYAML_SPEC'"
+  exit 2
+else
+  cat >&2 <<'MSG'
+ERROR: No supported Python environment manager found.
+
+Install one of these and rerun:
+  - uv (recommended): https://docs.astral.sh/uv/
+  - mise: https://mise.jdx.dev/
+  - asdf: https://asdf-vm.com/
+  - pyenv: https://github.com/pyenv/pyenv
+
+uv is preferred because this validator can request PyYAML without mutating your
+active Python installation.
+MSG
+  exit 2
+fi

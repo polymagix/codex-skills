@@ -1,0 +1,4 @@
+interface:
+  display_name: "Skill Validator"
+  short_description: "Validate Codex skill directories"
+  default_prompt: "Use $skill-validator to validate a Codex skill directory."

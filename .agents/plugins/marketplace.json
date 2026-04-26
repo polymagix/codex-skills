@@ -1,0 +1,20 @@
+{
+  "name": "polymagix-codex-skills",
+  "interface": {
+    "displayName": "Polymagix Codex Skills"
+  },
+  "plugins": [
+    {
+      "name": "skill-validator",
+      "source": {
+        "source": "local",
+        "path": "./plugins/skill-validator"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}
