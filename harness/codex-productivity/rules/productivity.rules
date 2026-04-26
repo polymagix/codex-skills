@@ -1,0 +1,24 @@
+# Productivity-focused allow rules for trusted Polymagix Codex sessions.
+# These reduce prompts for routine repo, GitHub, uv, and local skill validation work.
+# Keep destructive commands such as rm, git reset --hard, and broad shell interpreters gated.
+
+prefix_rule(pattern=["gh", "api"], decision="allow")
+prefix_rule(pattern=["gh", "auth", "status"], decision="allow")
+prefix_rule(pattern=["gh", "repo", "create"], decision="allow")
+prefix_rule(pattern=["gh", "repo", "view"], decision="allow")
+prefix_rule(pattern=["gh", "pr", "view"], decision="allow")
+prefix_rule(pattern=["gh", "pr", "checks"], decision="allow")
+prefix_rule(pattern=["gh", "pr", "comment"], decision="allow")
+prefix_rule(pattern=["git", "fetch"], decision="allow")
+prefix_rule(pattern=["git", "ls-remote"], decision="allow")
+prefix_rule(pattern=["git", "push"], decision="allow")
+prefix_rule(pattern=["git", "remote", "add"], decision="allow")
+prefix_rule(pattern=["git", "remote", "show"], decision="allow")
+prefix_rule(pattern=["git", "worktree", "list"], decision="allow")
+prefix_rule(pattern=["git", "worktree", "add"], decision="allow")
+prefix_rule(pattern=["uv", "run"], decision="allow")
+prefix_rule(pattern=["uv", "sync"], decision="allow")
+prefix_rule(pattern=["npm", "run", "lint:md"], decision="allow")
+prefix_rule(pattern=["npm", "run", "lint:md:fix"], decision="allow")
+prefix_rule(pattern=["/home/peter/.codex/bin/validate-codex-skill"], decision="allow")
+prefix_rule(pattern=["/home/peter/.codex/skills/skill-validator/scripts/validate-codex-skill"], decision="allow")

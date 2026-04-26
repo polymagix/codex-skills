@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Low-friction Codex launcher for trusted Polymagix workspaces.
+# It keeps sandboxing enabled, but grants the working directories and env
+# variables needed for normal repo maintenance, GitHub work, skills, and uv.
+
+export GH_PROMPT_DISABLED="${GH_PROMPT_DISABLED:-1}"
+
+if [[ -z "${GH_TOKEN:-}" && -z "${GITHUB_TOKEN:-}" ]] && command -v gh >/dev/null 2>&1; then
+  if token="$(gh auth token 2>/dev/null)" && [[ -n "$token" ]]; then
+    export GH_TOKEN="$token"
+  fi
+fi
+
+codex_bin="${CODEX_BIN:-codex}"
+
+args=(
+  --sandbox workspace-write
+  --ask-for-approval on-request
+  --add-dir /home/peter/Work/polymagix
+  --add-dir /mnt/data/Work/polymagix
+  --add-dir /home/peter/.codex/skills
+  --add-dir /home/peter/.codex/bin
+  --add-dir /home/peter/.codex/cache
+)
+
+if [[ -n "${CODEX_EXTRA_ADD_DIRS:-}" ]]; then
+  IFS=":" read -r -a extra_dirs <<< "$CODEX_EXTRA_ADD_DIRS"
+  for dir in "${extra_dirs[@]}"; do
+    [[ -n "$dir" ]] && args+=(--add-dir "$dir")
+  done
+fi
+
+exec "$codex_bin" "${args[@]}" "$@"
